@@ -67,7 +67,36 @@ window.RelayGame = window.RelayGame || {};
           if (alpha[y * W + x]) colProj[x]++;
         }
       }
-      const cols = splitRuns(colProj, W, Math.max(4, Math.floor(W * 0.012)), Math.floor(W * 0.04));
+      const rawCols = splitRuns(colProj, W, 0, Math.floor(W * 0.04));
+      const cols = [];
+      rawCols.forEach(([x0, x1]) => {
+        const rw = x1 - x0 + 1;
+        if (rw > W * 0.34) {
+          const nParts = Math.max(2, Math.min(4, Math.round(rw / (W * 0.24))));
+          const cuts = [x0];
+          for (let k = 1; k < nParts; k++) {
+            const approx = x0 + Math.floor((rw * k) / nParts);
+            const win = Math.max(8, Math.floor((rw / nParts) * 0.25));
+            const lo = Math.max(x0 + 10, approx - win);
+            const hi = Math.min(x1 - 10, approx + win);
+            let bestX = approx;
+            let bestVal = Infinity;
+            for (let vx = lo; vx <= hi; vx++) {
+              if (colProj[vx] < bestVal) {
+                bestVal = colProj[vx];
+                bestX = vx;
+              }
+            }
+            cuts.push(bestX);
+          }
+          cuts.push(x1 + 1);
+          for (let k = 0; k < nParts; k++) {
+            cols.push([cuts[k], cuts[k + 1] - 1]);
+          }
+        } else {
+          cols.push([x0, x1]);
+        }
+      });
       if (cols.length < 2) return;
 
       // Compute shared foot baseline across the entire row
