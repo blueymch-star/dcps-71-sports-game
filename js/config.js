@@ -82,7 +82,8 @@ window.RelayGame = window.RelayGame || {};
     p1_vfx_sheet: "assets/p1_vfx_sheet.png",
     p2_vfx_sheet: "assets/p2_vfx_sheet.png",
     p3_vfx_sheet: "assets/p3_vfx_sheet.png",
-    p4_vfx_sheet: "assets/p4_vfx_sheet.png"
+    p4_vfx_sheet: "assets/p4_vfx_sheet.png",
+    teacher_portrait: "assets/Teacher_portrait.png"
   };
 
   G.RUNNERS = [
@@ -207,7 +208,7 @@ window.RelayGame = window.RelayGame || {};
     0: [
       {
         speaker: "體育老師",
-        portrait: "referee",
+        portrait: "teacher_portrait",
         text: "各位選手注意！大庄國小 71 週年校慶大隊接力馬上開始，第一棒準備！"
       },
       {
