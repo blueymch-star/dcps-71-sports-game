@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>大庄國小 71 週年校慶｜HD-2D 大隊接力大作戰</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
@@ -33,6 +36,7 @@
     <!-- Right Arcade Rail -->
     <aside id="rightRail" class="rail right-rail">
       <div class="menu-slot">
+        <button id="btnFullscreen" class="btn-menu btn-fs" type="button" title="切換全螢幕">⛶ 全螢幕</button>
         <button id="btnMenu" class="btn-menu" type="button">選單</button>
       </div>
 
@@ -63,6 +67,7 @@
       <h2 id="menuTitle">大庄 71 週年接力選單</h2>
       <div class="modal-actions">
         <button id="btnResume" class="modal-btn primary" type="button">繼續奔跑</button>
+        <button id="btnToggleFullscreen" class="modal-btn" type="button">切換橫向全螢幕</button>
         <button id="btnToggleBgm" class="modal-btn" type="button">背景音樂：開</button>
         <button id="btnToggleSfx" class="modal-btn" type="button">遊戲音效：開</button>
         <button id="btnGoStageSelect" class="modal-btn" type="button">回到選關畫面</button>
@@ -85,7 +90,8 @@
         橫向全螢幕遊玩畫面更大、虛擬搖桿與「絕／衝／射／跳」按鍵更好按！
       </p>
       <div class="modal-actions">
-        <button id="btnDismissRotate" class="modal-btn primary" type="button">仍以目前方向繼續玩</button>
+        <button id="btnRotateFullscreen" class="modal-btn primary" type="button">📱 進入橫向全螢幕</button>
+        <button id="btnDismissRotate" class="modal-btn" type="button">仍以目前方向繼續玩</button>
       </div>
     </div>
   </div>

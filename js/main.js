@@ -225,14 +225,90 @@ window.RelayGame = window.RelayGame || {};
     btn.addEventListener("pointercancel", release);
   });
 
-  // System Menu Modal
+  // System Menu Modal & Fullscreen Landscape Helper
   const menuModal = document.getElementById("menuModal");
   const btnMenu = document.getElementById("btnMenu");
+  const btnFullscreen = document.getElementById("btnFullscreen");
+  const btnToggleFullscreen = document.getElementById("btnToggleFullscreen");
+  const btnRotateFullscreen = document.getElementById("btnRotateFullscreen");
   const btnResume = document.getElementById("btnResume");
   const btnToggleBgm = document.getElementById("btnToggleBgm");
   const btnToggleSfx = document.getElementById("btnToggleSfx");
   const btnGoStageSelect = document.getElementById("btnGoStageSelect");
   const btnGoTitle = document.getElementById("btnGoTitle");
+
+  function isFullscreenActive() {
+    return !!(document.fullscreenElement || document.webkitFullscreenElement);
+  }
+
+  function updateFullscreenLabels() {
+    const active = isFullscreenActive();
+    if (btnFullscreen) btnFullscreen.textContent = active ? "⛶ 退出" : "⛶ 全螢幕";
+    if (btnToggleFullscreen) btnToggleFullscreen.textContent = active ? "退出全螢幕" : "切換橫向全螢幕";
+  }
+
+  async function enterLandscapeFullscreen() {
+    const el = document.documentElement;
+    try {
+      if (el.requestFullscreen) {
+        await el.requestFullscreen({ navigationUI: "hide" });
+      } else if (el.webkitRequestFullscreen) {
+        el.webkitRequestFullscreen();
+      }
+    } catch (_) {
+      // Ignore on browsers that disallow programmatic fullscreen (e.g., iOS Safari)
+    }
+    try {
+      if (screen.orientation && screen.orientation.lock) {
+        await screen.orientation.lock("landscape");
+      }
+    } catch (_) {
+      // Ignore if orientation lock is unsupported
+    }
+    updateFullscreenLabels();
+  }
+
+  async function toggleFullscreen() {
+    if (isFullscreenActive()) {
+      try {
+        if (document.exitFullscreen) await document.exitFullscreen();
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+      } catch (_) {}
+      try {
+        if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock();
+      } catch (_) {}
+      updateFullscreenLabels();
+    } else {
+      await enterLandscapeFullscreen();
+    }
+  }
+
+  document.addEventListener("fullscreenchange", updateFullscreenLabels);
+  document.addEventListener("webkitfullscreenchange", updateFullscreenLabels);
+
+  if (btnFullscreen) {
+    btnFullscreen.addEventListener("click", () => {
+      G.Audio.unlock();
+      G.Audio.play("confirm");
+      toggleFullscreen();
+    });
+  }
+  if (btnToggleFullscreen) {
+    btnToggleFullscreen.addEventListener("click", () => {
+      G.Audio.play("confirm");
+      toggleFullscreen();
+      toggleMenuModal(false);
+    });
+  }
+  if (btnRotateFullscreen) {
+    btnRotateFullscreen.addEventListener("click", async () => {
+      G.Audio.unlock();
+      G.Audio.play("confirm");
+      await enterLandscapeFullscreen();
+      const rotateHint = document.getElementById("rotateHint");
+      if (rotateHint) rotateHint.classList.add("hidden");
+    });
+  }
 
   function toggleMenuModal(forceOpen) {
     const willOpen = typeof forceOpen === "boolean" ? forceOpen : menuModal.classList.contains("hidden");
