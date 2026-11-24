@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>大庄國小 71 週年校慶｜HD-2D 大隊接力大作戰</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="cabinet">
+    <!-- Left Arcade Rail -->
+    <aside id="leftRail" class="rail left-rail">
+      <div class="badge-slot">
+        <div id="runnerBadge" class="runner-badge" title="目前棒次選手">
+          <canvas id="badgeCanvas" width="56" height="56"></canvas>
+          <span id="badgeLegTag" class="badge-leg">1棒</span>
+        </div>
+      </div>
+
+      <div class="joystick-wrapper">
+        <div id="joystickZone" class="joystick-zone" aria-label="虛擬方向搖桿">
+          <div class="joystick-cross"></div>
+          <div id="joystickKnob" class="joystick-knob"></div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Center 16:9 HD-2D Game Stage -->
+    <main id="stageCenter" class="stage-center">
+      <canvas id="gameCanvas" width="960" height="540"></canvas>
+    </main>
+
+    <!-- Right Arcade Rail -->
+    <aside id="rightRail" class="rail right-rail">
+      <div class="menu-slot">
+        <button id="btnMenu" class="btn-menu" type="button">選單</button>
+      </div>
+
+      <div class="buttons-arc">
+        <button id="btnSuper" class="arc-btn btn-super" type="button" data-action="super">
+          <span class="btn-main">絕</span>
+          <span id="btnSuperSub" class="btn-sub">絕招</span>
+        </button>
+        <button id="btnDash" class="arc-btn btn-dash" type="button" data-action="dash">
+          <span class="btn-main">衝</span>
+          <span class="btn-sub">DASH</span>
+        </button>
+        <button id="btnShoot" class="arc-btn btn-shoot" type="button" data-action="shoot">
+          <span class="btn-main">射</span>
+          <span class="btn-sub">確定</span>
+        </button>
+        <button id="btnJump" class="arc-btn btn-jump" type="button" data-action="jump">
+          <span class="btn-main">跳</span>
+          <span class="btn-sub">JUMP</span>
+        </button>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Pause / System Menu Modal -->
+  <div id="menuModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="menuTitle">
+    <div class="modal-box">
+      <h2 id="menuTitle">大庄 71 週年接力選單</h2>
+      <div class="modal-actions">
+        <button id="btnResume" class="modal-btn primary" type="button">繼續奔跑</button>
+        <button id="btnToggleBgm" class="modal-btn" type="button">背景音樂：開</button>
+        <button id="btnToggleSfx" class="modal-btn" type="button">遊戲音效：開</button>
+        <button id="btnGoStageSelect" class="modal-btn" type="button">回到選關畫面</button>
+        <button id="btnGoTitle" class="modal-btn danger" type="button">回到標題畫面</button>
+      </div>
+      <div class="key-help">
+        <p><strong>電腦鍵盤操作：</strong></p>
+        <p>移動：<code>← → / A D</code> ｜ 跳躍 / 二段跳：<code>↑ / Space / K</code></p>
+        <p>射擊 / 確定 / 交棒：<code>J / Z / Enter</code> ｜ 衝刺：<code>Shift / L / X</code></p>
+        <p>絕招（滿氣）：<code>E / Q / C</code> ｜ 選單：<code>Esc / P</code></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Portrait Mobile Hint Overlay -->
+  <div id="rotateHint" class="modal-overlay hidden" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <h2>📱 建議把手機轉成橫向</h2>
+      <p style="font-size:14px;line-height:1.7;color:#cbd5e1;margin-bottom:14px;">
+        橫向全螢幕遊玩畫面更大、虛擬搖桿與「絕／衝／射／跳」按鍵更好按！
+      </p>
+      <div class="modal-actions">
+        <button id="btnDismissRotate" class="modal-btn primary" type="button">仍以目前方向繼續玩</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/sprites.js"></script>
+  <script src="js/sheets.js"></script>
+  <script src="js/vfx.js"></script>
+  <script src="js/background.js"></script>
+  <script src="js/entities.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
