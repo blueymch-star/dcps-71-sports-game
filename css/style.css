@@ -41,11 +41,11 @@ body {
   width: 100vw;
   height: 100dvh;
   display: grid;
-  grid-template-columns: clamp(104px, 13vw, 172px) minmax(0, 1fr) clamp(114px, 14vw, 184px);
+  grid-template-columns: clamp(104px, 13vw, 172px) minmax(0, 1fr) clamp(118px, 14.5vw, 188px);
   align-items: center;
   justify-items: center;
   gap: 8px;
-  padding: 8px 10px;
+  padding: max(8px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
 }
 
 .rail {
@@ -390,45 +390,216 @@ body {
   font-family: ui-monospace, monospace;
 }
 
-/* Portrait phone fallback */
+/* Landscape Mobile / Compact Height (phones in landscape) */
+@media (max-height: 540px) and (orientation: landscape) {
+  #cabinet {
+    grid-template-columns: clamp(106px, 15vw, 144px) minmax(0, 1fr) clamp(118px, 17vw, 156px);
+    gap: 6px;
+    padding: max(4px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+  }
+
+  .rail {
+    padding: 4px 2px;
+  }
+
+  .runner-badge {
+    width: 50px;
+    height: 56px;
+  }
+
+  #badgeCanvas {
+    width: 38px;
+    height: 38px;
+  }
+
+  .badge-leg {
+    font-size: 9px;
+    padding: 0 4px;
+  }
+
+  .btn-menu {
+    padding: 5px 12px;
+    font-size: 11px;
+  }
+
+  .joystick-wrapper {
+    padding-bottom: 6px;
+  }
+
+  .joystick-zone {
+    width: clamp(86px, 23dvh, 114px);
+    height: clamp(86px, 23dvh, 114px);
+  }
+
+  #gameCanvas {
+    width: min(100%, calc((100dvh - 12px) * 16 / 9));
+    max-height: calc(100dvh - 12px);
+    border-radius: 6px;
+  }
+
+  /* 2x2 ergonomic thumb cluster at bottom-right */
+  .buttons-arc {
+    width: 100%;
+    height: auto;
+    margin-top: auto;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    justify-items: center;
+    align-items: center;
+    padding-bottom: 4px;
+  }
+
+  .arc-btn {
+    width: clamp(46px, 13.5dvh, 58px);
+    height: clamp(46px, 13.5dvh, 58px);
+    border-width: 2.5px;
+  }
+
+  .arc-btn .btn-main {
+    font-size: clamp(16px, 4.5dvh, 20px);
+  }
+
+  .arc-btn .btn-sub {
+    font-size: 8px;
+  }
+
+  .btn-dash,
+  .btn-shoot {
+    margin-right: 0;
+  }
+
+  .btn-super,
+  .btn-jump {
+    align-self: center;
+  }
+
+  /* Slight natural thumb stagger: left column slightly lower */
+  .btn-super,
+  .btn-shoot {
+    transform: translateY(6px);
+  }
+
+  .btn-super:active,
+  .btn-super.pressed,
+  .btn-shoot:active,
+  .btn-shoot.pressed {
+    transform: translateY(6px) scale(0.91);
+  }
+}
+
+/* Portrait phone layout */
 @media (max-width: 680px) and (orientation: portrait) {
   #cabinet {
     grid-template-columns: 1fr 1fr;
     grid-template-rows: auto 1fr;
-    padding: 8px;
+    align-items: stretch;
+    gap: 10px 8px;
+    padding: max(12px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
   }
 
   .stage-center {
     grid-column: 1 / -1;
     grid-row: 1;
     height: auto;
+    padding-top: 4px;
+  }
+
+  #gameCanvas {
+    width: 100%;
+    max-height: 44dvh;
+    border-radius: 8px;
   }
 
   .left-rail {
     grid-column: 1;
     grid-row: 2;
-    flex-direction: row;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 4px 6px 10px;
+  }
+
+  .badge-slot {
+    padding-left: 4px;
+  }
+
+  .runner-badge {
+    width: 56px;
+    height: 64px;
+  }
+
+  #badgeCanvas {
+    width: 44px;
+    height: 44px;
+  }
+
+  .joystick-wrapper {
+    width: 100%;
     align-items: center;
-    padding: 4px;
+    justify-content: center;
+    padding-bottom: 8px;
+  }
+
+  .joystick-zone {
+    width: clamp(104px, 28vw, 132px);
+    height: clamp(104px, 28vw, 132px);
   }
 
   .right-rail {
     grid-column: 2;
     grid-row: 2;
-    padding: 4px;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 4px 6px 10px;
+  }
+
+  .menu-slot {
+    justify-content: flex-end;
+    padding-right: 4px;
   }
 
   .buttons-arc {
-    width: 160px;
-    height: 150px;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 8px;
+    width: 100%;
+    max-width: 164px;
+    height: auto;
+    margin: auto 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px 10px;
+    justify-items: center;
+    align-items: center;
+    padding-bottom: 6px;
+  }
+
+  .arc-btn {
+    width: clamp(58px, 16vw, 68px);
+    height: clamp(58px, 16vw, 68px);
+  }
+
+  .arc-btn .btn-main {
+    font-size: 20px;
   }
 
   .btn-dash,
   .btn-shoot {
     margin-right: 0;
+  }
+
+  .btn-super,
+  .btn-jump {
+    align-self: center;
+  }
+
+  .btn-super,
+  .btn-shoot {
+    transform: translateY(8px);
+  }
+
+  .btn-super:active,
+  .btn-super.pressed,
+  .btn-shoot:active,
+  .btn-shoot.pressed {
+    transform: translateY(8px) scale(0.91);
   }
 }
