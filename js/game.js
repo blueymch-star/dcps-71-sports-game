@@ -305,6 +305,7 @@ window.RelayGame = window.RelayGame || {};
       }
 
       if (this.state === "TITLE") {
+        if (G.Assets && !G.Assets.ready) return;
         if (input.shootPressed || input.jumpPressed) {
           G.Audio.unlock();
           G.Audio.play("confirm");
@@ -567,10 +568,17 @@ window.RelayGame = window.RelayGame || {};
 
       if (this.state === "TITLE") {
         const titleImg = G.Assets.images.title_bg;
-        if (titleImg && titleImg.complete && titleImg.naturalWidth > 0) {
+        const hasTitleImg = titleImg && titleImg.complete && titleImg.naturalWidth > 0;
+        if (!G.Assets.ready && !hasTitleImg) {
+          this.drawLoadingScreen(ctx, W, H);
+          ctx.restore();
+          return;
+        }
+        if (hasTitleImg) {
           ctx.drawImage(titleImg, 0, 0, W, H);
         } else {
-          G.Background.draw(ctx, G.STAGES[0], this.time * 45, this.time, null);
+          ctx.fillStyle = "#080a14";
+          ctx.fillRect(0, 0, W, H);
         }
         this.drawTitleOverlay(ctx, W, H);
         ctx.restore();
@@ -635,6 +643,37 @@ window.RelayGame = window.RelayGame || {};
         this.drawGameOverOverlay(ctx, W, H);
       }
 
+      ctx.restore();
+    }
+
+    drawLoadingScreen(ctx, W, H) {
+      ctx.fillStyle = "#080a14";
+      ctx.fillRect(0, 0, W, H);
+
+      const total = Math.max(1, G.Assets.totalCount || 1);
+      const pct = Math.min(1, (G.Assets.loadedCount || 0) / total);
+
+      ctx.save();
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#fde047";
+      ctx.font = "900 32px 'Cubic11', 'Noto Sans TC', sans-serif";
+      ctx.fillText("大庄國小 71 校慶運動會", W * 0.5, H * 0.42);
+
+      ctx.fillStyle = "#94a3b8";
+      ctx.font = "bold 16px 'Cubic11', 'Noto Sans TC', sans-serif";
+      ctx.fillText(`載入校慶美術資源中... ${Math.round(pct * 100)}%`, W * 0.5, H * 0.52);
+
+      const bw = 340;
+      const bh = 18;
+      const bx = (W - bw) * 0.5;
+      const by = H * 0.58;
+      ctx.fillStyle = "#0f172a";
+      ctx.strokeStyle = "#38bdf8";
+      ctx.lineWidth = 3;
+      ctx.fillRect(bx, by, bw, bh);
+      ctx.strokeRect(bx, by, bw, bh);
+      ctx.fillStyle = "#22c55e";
+      ctx.fillRect(bx + 3, by + 3, (bw - 6) * pct, bh - 6);
       ctx.restore();
     }
 
