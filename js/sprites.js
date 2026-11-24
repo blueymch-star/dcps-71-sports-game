@@ -49,7 +49,7 @@ window.RelayGame = window.RelayGame || {};
           if (onDone) onDone();
         }
       };
-      img.src = src + (src.includes("?") ? "&" : "?") + "v=20261124c";
+      img.src = src + (src.includes("?") ? "&" : "?") + "v=20261125a";
     });
   };
 
@@ -205,6 +205,11 @@ window.RelayGame = window.RelayGame || {};
           sy *= 0.96;
         }
 
+        if (o.crouching) {
+          sy *= 0.72;
+          sx *= 1.12;
+        }
+
         if (o.drinkAura || o.superAura) {
           // Glowing rising Ki flames after drinking sports drink or activating Super Mode
           const flameSheet = G.Assets.images.vfx_flame_sheet;
@@ -248,6 +253,20 @@ window.RelayGame = window.RelayGame || {};
           ctx.fillStyle = "#ef4444";
           ctx.font = "bold 16px sans-serif";
           ctx.fillText("×_×", 0, -drawH - 6);
+        }
+
+        if (o.stunned) {
+          ctx.save();
+          ctx.scale(facing, 1);
+          ctx.fillStyle = "#fde047";
+          ctx.strokeStyle = "#0f172a";
+          ctx.lineWidth = 3;
+          ctx.font = "bold 14px sans-serif";
+          ctx.textAlign = "center";
+          const sx1 = Math.sin(t * 10) * 16;
+          ctx.strokeText("★ 暈眩！", sx1, -drawH - 10);
+          ctx.fillText("★ 暈眩！", sx1, -drawH - 10);
+          ctx.restore();
         }
 
         // Melee Baton Swing Crescent Slash
@@ -416,7 +435,10 @@ window.RelayGame = window.RelayGame || {};
     },
 
     drawBoss(ctx, boss, screenX, y, t) {
-      const img = Assets.images[boss.spriteKey];
+      const sheetFrame = G.Sheets && G.Sheets.getBossFrame
+        ? G.Sheets.getBossFrame(boss.spriteKey, boss.hurtFlash > 0 ? "hurt" : boss.state, t)
+        : null;
+      const img = sheetFrame || Assets.images[boss.spriteKey];
 
       // Shadow
       ctx.save();
@@ -426,19 +448,39 @@ window.RelayGame = window.RelayGame || {};
       ctx.fill();
       ctx.restore();
 
-      if (img && img.complete && img.naturalWidth > 0) {
-        const targetH = 166;
-        const w = img.naturalWidth * (targetH / img.naturalHeight);
+      const imgReady = sheetFrame || (img && img.complete && img.naturalWidth > 0);
+      if (imgReady) {
+        const iw = img.naturalWidth || img.width;
+        const ih = img.naturalHeight || img.height;
+        const targetH = sheetFrame ? 172 : 166;
+        const w = iw * (targetH / ih);
         const bob = boss.state === "defeated" ? -18 + Math.sin(t * 10) * 6 : Math.sin(t * 4.5) * 6;
-        const rot = boss.state === "defeated" ? -0.32 : boss.state === "charge" ? -0.1 : 0;
+        const rot = boss.state === "defeated" ? -0.32 : boss.state === "charge" ? 0.1 : 0;
 
         ctx.save();
         ctx.translate(screenX, y + bob);
-        ctx.scale(boss.facing < 0 ? 1 : -1, 1);
+        // New boss sprite sheets face RIGHT; legacy static boss PNGs face LEFT
+        ctx.scale(sheetFrame ? (boss.facing >= 0 ? 1 : -1) : (boss.facing < 0 ? 1 : -1), 1);
         ctx.rotate(rot);
         if (boss.hurtFlash > 0) ctx.filter = "brightness(1.9)";
         ctx.drawImage(img, -w * 0.5, -targetH, w, targetH);
         ctx.restore();
+
+        // Boss 1 flashbang charge lens flare telegraph
+        if (boss.state === "telegraph") {
+          ctx.save();
+          const pulse = 0.5 + 0.5 * Math.sin(t * 32);
+          const lx = screenX + boss.facing * 45;
+          const ly = y - 92;
+          ctx.fillStyle = `rgba(255, 255, 255, ${0.55 + pulse * 0.4})`;
+          ctx.beginPath();
+          ctx.arc(lx, ly, 14 + pulse * 14, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = "#fde047";
+          ctx.lineWidth = 3;
+          ctx.stroke();
+          ctx.restore();
+        }
 
         if (boss.state === "defeated") {
           ctx.save();
@@ -758,7 +800,70 @@ window.RelayGame = window.RelayGame || {};
         }
       } else {
         // Enemy / Boss projectiles
-        if (proj.kind === "tornado") {
+        if (proj.kind === "bobaPearl") {
+          ctx.fillStyle = "#d97706";
+          ctx.beginPath();
+          ctx.arc(0, 0, 11, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = "#29150b";
+          ctx.beginPath();
+          ctx.arc(0, 0, 8, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = "#fde68a";
+          ctx.beginPath();
+          ctx.arc(-3, -3, 2.5, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (proj.kind === "debrisCone") {
+          ctx.rotate((Date.now() * 0.01) % (Math.PI * 2));
+          ctx.fillStyle = "#f97316";
+          ctx.beginPath();
+          ctx.moveTo(0, -14);
+          ctx.lineTo(11, 11);
+          ctx.lineTo(-11, 11);
+          ctx.closePath();
+          ctx.fill();
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(-5, -2, 10, 4);
+        } else if (proj.kind === "debrisTarp") {
+          ctx.rotate((Date.now() * 0.008) % (Math.PI * 2));
+          ctx.fillStyle = "#2563eb";
+          ctx.fillRect(-12, -10, 24, 20);
+          ctx.fillStyle = "#ef4444";
+          ctx.fillRect(-12, -3, 24, 6);
+          ctx.fillStyle = "#fde047";
+          ctx.fillRect(-12, 4, 24, 4);
+        } else if (proj.kind === "debrisBranch") {
+          ctx.rotate((Date.now() * 0.012) % (Math.PI * 2));
+          ctx.strokeStyle = "#78350f";
+          ctx.lineWidth = 4;
+          ctx.beginPath();
+          ctx.moveTo(-14, 4);
+          ctx.lineTo(14, -4);
+          ctx.stroke();
+          ctx.fillStyle = "#22c55e";
+          ctx.beginPath();
+          ctx.arc(8, -6, 6, 0, Math.PI * 2);
+          ctx.arc(-4, 0, 5, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (proj.kind === "hotSausage") {
+          ctx.rotate(Math.atan2(proj.vy || 0, proj.vx || 1));
+          ctx.fillStyle = "rgba(249, 115, 22, 0.45)";
+          ctx.beginPath();
+          ctx.ellipse(0, 0, 17, 9, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = "#b91c1c";
+          ctx.beginPath();
+          ctx.roundRect(-13, -5, 26, 10, 5);
+          ctx.fill();
+          ctx.strokeStyle = "#fde047";
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(-5, -4);
+          ctx.lineTo(-3, 4);
+          ctx.moveTo(4, -4);
+          ctx.lineTo(6, 4);
+          ctx.stroke();
+        } else if (proj.kind === "tornado") {
           ctx.fillStyle = "#a855f7";
           ctx.beginPath();
           ctx.ellipse(0, 0, 16, 22, 0, 0, Math.PI * 2);

@@ -83,7 +83,15 @@ window.RelayGame = window.RelayGame || {};
     p2_vfx_sheet: "assets/p2_vfx_sheet.png",
     p3_vfx_sheet: "assets/p3_vfx_sheet.png",
     p4_vfx_sheet: "assets/p4_vfx_sheet.png",
-    teacher_portrait: "assets/Teacher_portrait.png"
+    teacher_portrait: "assets/Teacher_portrait.png",
+    boss1_portrait: "assets/boss1_portrait.png",
+    boss2_portrait: "assets/boss2_trash_portrait.png",
+    boss3_portrait: "assets/boss3_typhoon_portrait.png",
+    boss4_portrait: "assets/boss4_portrait.png",
+    sheet_boss_1: "assets/sheet_boss_1.png",
+    sheet_boss_2: "assets/sheet_boss_2.png",
+    sheet_boss_3: "assets/sheet_boss_3.png",
+    sheet_boss_4: "assets/sheet_boss_4.png"
   };
 
   G.RUNNERS = [
@@ -264,10 +272,11 @@ window.RelayGame = window.RelayGame || {};
       timeOfDay: "morning",
       wind: 0,
       bossKey: "boss_1",
-      bossName: "烏龍搶跑魔",
+      bossName: "攝影狂魔老爸",
+      bossPortraitKey: "boss1_portrait",
       bossHp: 34,
-      bossQuote: "嗶嗶！誰准你跑這麼快的！",
-      bossDefeatQuote: "烏龍搶跑魔：我的哨子…還會再響的～",
+      bossQuote: "借過借過！別擋住我拍寶貝衝刺的黃金角度！超頻閃光燈準備！",
+      bossDefeatQuote: "攝影狂魔老爸：慘了…剛剛居然忘了拔鏡頭蓋～",
       platforms: [
         { x: 650, y: 345, w: 150 },
         { x: 1320, y: 335, w: 180 },
@@ -326,9 +335,10 @@ window.RelayGame = window.RelayGame || {};
       wind: 0,
       bossKey: "boss_2",
       bossName: "亂丟飲料垃圾獸",
+      bossPortraitKey: "boss2_portrait",
       bossHp: 42,
-      bossQuote: "喝完手搖飲直接丟跑道最爽啦！",
-      bossDefeatQuote: "垃圾獸：我…我會做好資源回收的～",
+      bossQuote: "喝完手搖飲直接丟跑道最爽啦！吃我珍珠散彈連射！",
+      bossDefeatQuote: "亂丟飲料垃圾獸：我…我會乖乖做好資源回收的～",
       platforms: [
         { x: 580, y: 340, w: 160 },
         { x: 1180, y: 320, w: 160 },
@@ -389,9 +399,10 @@ window.RelayGame = window.RelayGame || {};
       wind: -68,
       bossKey: "boss_3",
       bossName: "彎道逆風颱風怪",
+      bossPortraitKey: "boss3_portrait",
       bossHp: 50,
-      bossQuote: "呼呼呼！想過彎道先問過我的暴風！",
-      bossDefeatQuote: "颱風怪：可惡…居然頂著逆風跑過來了～",
+      bossQuote: "呼呼呼！九降風狂吹，三角錐跟彩帶通通起飛吧！",
+      bossDefeatQuote: "彎道逆風颱風怪：可惡…居然頂著逆風跑過來了～",
       platforms: [
         { x: 520, y: 340, w: 160 },
         { x: 1090, y: 315, w: 180 },
@@ -453,10 +464,11 @@ window.RelayGame = window.RelayGame || {};
       timeOfDay: "finale",
       wind: -40,
       bossKey: "boss_4",
-      bossName: "抽筋大魔王",
+      bossName: "園遊會暴走攤販阿伯",
+      bossPortraitKey: "boss4_portrait",
       bossHp: 62,
-      bossQuote: "終點線就在眼前？先嚐嚐大腿抽筋閃電！",
-      bossDefeatQuote: "抽筋大魔王：啊！這就是大庄國小的運動家精神嗎～",
+      bossQuote: "少年仔別急著衝線！來一根剛烤好的高溫大香腸啦！",
+      bossDefeatQuote: "暴走攤販阿伯：唉呦我的餐車！好啦免費請全班吃香腸～",
       platforms: [
         { x: 520, y: 340, w: 160 },
         { x: 1060, y: 315, w: 170 },

@@ -103,13 +103,22 @@ window.RelayGame = window.RelayGame || {};
       this.hitIds = new Set();
     }
 
-    update(dt) {
+    update(dt, game) {
       this.x += this.vx * dt;
       this.y += this.vy * dt;
       this.vy += this.gravity * dt;
       if (this.bounce && this.y >= G.CONST.GROUND_Y - 10) {
         this.y = G.CONST.GROUND_Y - 10;
         this.vy = -Math.abs(this.vy) * 0.85 - 180;
+      }
+      if (this.kind === "hotSausage" && this.y >= G.CONST.GROUND_Y - 10) {
+        this.life = 0;
+        if (game && game.pickups) {
+          const activeSausages = game.pickups.filter((pk) => pk.active && pk.type === "food_sausage").length;
+          if (activeSausages < 6) {
+            game.pickups.push(new Pickup({ type: "food_sausage", x: this.x, y: G.CONST.GROUND_Y - 16 }));
+          }
+        }
       }
       this.life -= dt;
     }
@@ -146,6 +155,8 @@ window.RelayGame = window.RelayGame || {};
       this.meleeTimer = 0;
       this.fullness = 0;
       this.fatTimer = 0;
+      this.crouching = false;
+      this.stunTimer = 0;
 
       this.powerWeapon = null;
       this.powerAmmo = 0;
@@ -161,6 +172,8 @@ window.RelayGame = window.RelayGame || {};
       this.meleeTimer = 0;
       this.fullness = 0;
       this.fatTimer = 0;
+      this.crouching = false;
+      this.stunTimer = 0;
       if (!keepStats) {
         this.hp = G.CONST.MAX_HP;
         this.superCharge = 25;
@@ -180,6 +193,7 @@ window.RelayGame = window.RelayGame || {};
       if (this.spikesTimer > 0) this.spikesTimer -= dt;
       if (this.drinkAuraTimer > 0) this.drinkAuraTimer -= dt;
       if (this.superTimer > 0) this.superTimer -= dt;
+      if (this.stunTimer > 0) this.stunTimer -= dt;
       if (this.fatTimer > 0) {
         this.fatTimer -= dt;
         if (this.fatTimer <= 0) {
@@ -203,7 +217,11 @@ window.RelayGame = window.RelayGame || {};
         (this.superTimer > 0 ? 1.35 : 1) *
         (isFat ? 0.74 : 1);
 
-      if (this.knockbackTimer > 0) {
+      this.crouching = !!(this.onGround && input.downHeld && this.slipTimer <= 0 && this.knockbackTimer <= 0 && this.stunTimer <= 0 && this.dashTimer <= 0);
+
+      if (this.stunTimer > 0) {
+        this.vx *= 0.88;
+      } else if (this.knockbackTimer > 0) {
         this.knockbackTimer -= dt;
         this.vx *= 0.96;
       } else if (this.slipTimer > 0) {
@@ -220,14 +238,14 @@ window.RelayGame = window.RelayGame || {};
         const moveX = input.moveX;
         if (Math.abs(moveX) > 0.12) {
           this.facing = moveX > 0 ? 1 : -1;
-          this.vx = moveX * G.CONST.PLAYER_SPEED * speedMult + windForce;
+          this.vx = moveX * G.CONST.PLAYER_SPEED * speedMult * (this.crouching ? 0.35 : 1) + windForce;
         } else {
           this.vx = windForce * 0.55;
         }
       }
 
       // Jump / Double Jump
-      if (input.jumpPressed && this.slipTimer <= 0 && this.knockbackTimer <= 0 && this.jumpsLeft > 0) {
+      if (input.jumpPressed && this.slipTimer <= 0 && this.knockbackTimer <= 0 && this.stunTimer <= 0 && this.jumpsLeft > 0) {
         const isFirst = this.jumpsLeft === 2;
         this.vy = isFirst ? G.CONST.JUMP_VEL : G.CONST.DOUBLE_JUMP_VEL;
         this.onGround = false;
@@ -237,7 +255,7 @@ window.RelayGame = window.RelayGame || {};
       }
 
       // Dash (also burns fat timer!)
-      if (input.dashPressed && this.dashCooldown <= 0 && this.slipTimer <= 0 && this.knockbackTimer <= 0) {
+      if (input.dashPressed && this.dashCooldown <= 0 && this.slipTimer <= 0 && this.knockbackTimer <= 0 && this.stunTimer <= 0) {
         this.dashTimer = G.CONST.DASH_DURATION;
         this.dashCooldown = G.CONST.DASH_COOLDOWN;
         this.invulnTimer = Math.max(this.invulnTimer, 0.24);
@@ -249,7 +267,7 @@ window.RelayGame = window.RelayGame || {};
       }
 
       // Attack: Close-range Baton Melee OR Ranged Weapon
-      if (input.shootHeld && this.fireTimer <= 0 && this.slipTimer <= 0 && this.knockbackTimer <= 0) {
+      if (input.shootHeld && this.fireTimer <= 0 && this.slipTimer <= 0 && this.knockbackTimer <= 0 && this.stunTimer <= 0) {
         if (input.shootPressed && this.tryMelee(game)) {
           this.fireTimer = 0.22;
         } else {
@@ -644,7 +662,9 @@ window.RelayGame = window.RelayGame || {};
         hasSpikes: this.spikesTimer > 0,
         drinkAura: this.drinkAuraTimer > 0,
         isFat: this.fatTimer > 0,
-        superAura: this.superTimer > 0
+        superAura: this.superTimer > 0,
+        crouching: this.crouching,
+        stunned: this.stunTimer > 0
       });
     }
   }
@@ -912,10 +932,13 @@ window.RelayGame = window.RelayGame || {};
       this.y = this.spriteKey === "boss_3" ? G.CONST.GROUND_Y - 120 : G.CONST.GROUND_Y;
       this.baseY = this.y;
       this.facing = -1;
-      this.state = "idle"; // "idle" | "charge" | "attack" | "defeated"
+      this.state = "idle"; // "idle" | "charge" | "telegraph" | "attack" | "defeated"
       this.timer = 1.4;
       this.hurtFlash = 0;
       this.defeatTimer = 0;
+      this.flashTelegraphTimer = 0;
+      this.burstRemaining = 0;
+      this.burstCooldown = 0;
       this.active = true;
       this.bubbleOffset = 180;
     }
@@ -938,6 +961,27 @@ window.RelayGame = window.RelayGame || {};
       const minX = game.bossLock.minX + 90;
       const maxX = game.bossLock.maxX - 90;
 
+      // Boss 4 rapid sausage burst tick
+      if (this.burstRemaining > 0) {
+        this.burstCooldown -= dt;
+        if (this.burstCooldown <= 0) {
+          this.burstRemaining--;
+          this.burstCooldown = 0.14;
+          game.projectiles.push(
+            new Projectile({
+              x: this.x + this.facing * 40,
+              y: this.y - 78,
+              vx: this.facing * (300 + Math.random() * 90),
+              vy: -110 + Math.random() * 70,
+              gravity: 480,
+              fromPlayer: false,
+              kind: "hotSausage",
+              life: 2.6
+            })
+          );
+        }
+      }
+
       if (this.state === "idle") {
         // Gentle patrol
         this.x += Math.sin(game.time * 2) * 70 * dt;
@@ -945,7 +989,18 @@ window.RelayGame = window.RelayGame || {};
           this.y = this.baseY + Math.sin(game.time * 3) * 28;
         }
         if (this.timer <= 0) {
-          if (Math.random() < 0.45 && this.spriteKey !== "boss_3") {
+          if (this.spriteKey === "boss_1") {
+            if (Math.random() < 0.45) {
+              this.state = "charge";
+              this.timer = 1.05;
+              this.chargeDir = this.facing;
+            } else {
+              this.state = "telegraph";
+              this.flashTelegraphTimer = 1.05;
+              this.timer = 1.05;
+              game.addBubble(this, "📸 超頻閃光燈聚光！快蹲下或背對！", 1.1);
+            }
+          } else if (Math.random() < 0.45 && this.spriteKey !== "boss_3") {
             this.state = "charge";
             this.timer = 1.05;
             this.chargeDir = this.facing;
@@ -953,6 +1008,22 @@ window.RelayGame = window.RelayGame || {};
             this.state = "attack";
             this.timer = 0.65;
             this.fireAttack(player, game);
+          }
+        }
+      } else if (this.state === "telegraph") {
+        this.flashTelegraphTimer -= dt;
+        if (this.flashTelegraphTimer <= 0) {
+          this.state = "attack";
+          this.timer = 0.75;
+          game.flashBlindTimer = 0.85;
+          game.screenShake = 0.35;
+          G.Audio.play("warning");
+          const facingAway = (player.x < this.x && player.facing < 0) || (player.x >= this.x && player.facing > 0);
+          if (player.crouching || facingAway || player.invulnTimer > 0 || player.superTimer > 0) {
+            game.addBubble(player, "😎 成功躲過超頻閃光燈！", 1.4);
+          } else {
+            player.stunTimer = 1.6;
+            player.takeDamage(1, game, "😵 被超頻閃光燈閃暈啦！");
           }
         }
       } else if (this.state === "charge") {
@@ -981,40 +1052,45 @@ window.RelayGame = window.RelayGame || {};
       const dy = (player.y - 45) - (this.y - 75);
       const len = Math.max(1, Math.hypot(dx, dy));
 
-      if (this.spriteKey === "boss_3") {
-        // Typhoon wind tornados
-        [-90, 0, 90].forEach((vy) => {
+      if (this.spriteKey === "boss_2") {
+        // Boba Pearl 5-way scatter barrage
+        const baseAng = Math.atan2(dy, dx);
+        [-0.36, -0.18, 0, 0.18, 0.36].forEach((ang) => {
+          const speed = 310;
           game.projectiles.push(
             new Projectile({
-              x: this.x - 40,
-              y: this.y - 70,
-              vx: -280,
+              x: this.x + this.facing * 40,
+              y: this.y - 80,
+              vx: Math.cos(baseAng + ang) * speed,
+              vy: Math.sin(baseAng + ang) * speed,
+              fromPlayer: false,
+              kind: "bobaPearl",
+              life: 2.8
+            })
+          );
+        });
+      } else if (this.spriteKey === "boss_3") {
+        // Headwind Typhoon debris volley: cones, tent tarps, branches
+        const kinds = ["debrisCone", "debrisTarp", "debrisBranch"];
+        [-105, 0, 105].forEach((vy, ki) => {
+          game.projectiles.push(
+            new Projectile({
+              x: this.x + this.facing * 42,
+              y: this.y - 74,
+              vx: this.facing * 290,
               vy,
               fromPlayer: false,
-              kind: "tornado",
+              kind: kinds[ki],
               life: 2.8
             })
           );
         });
       } else if (this.spriteKey === "boss_4") {
-        // Lightning fan
-        [-0.25, 0, 0.25].forEach((ang) => {
-          const speed = 330;
-          const baseAng = Math.atan2(dy, dx) + ang;
-          game.projectiles.push(
-            new Projectile({
-              x: this.x + this.facing * 35,
-              y: this.y - 80,
-              vx: Math.cos(baseAng) * speed,
-              vy: Math.sin(baseAng) * speed,
-              fromPlayer: false,
-              kind: "lightning",
-              life: 2.6
-            })
-          );
-        });
+        // Food Cart Vendor Uncle rapid-fire hot sausage machine-gun burst
+        this.burstRemaining = 4;
+        this.burstCooldown = 0;
       } else {
-        // Aimed ball / boba cup / whistle blast
+        // Fallback aimed shot
         game.projectiles.push(
           new Projectile({
             x: this.x + this.facing * 35,
@@ -1022,7 +1098,7 @@ window.RelayGame = window.RelayGame || {};
             vx: (dx / len) * 320,
             vy: (dy / len) * 320,
             fromPlayer: false,
-            color: this.spriteKey === "boss_2" ? "#84cc16" : "#f43f5e",
+            color: "#f43f5e",
             life: 2.6
           })
         );

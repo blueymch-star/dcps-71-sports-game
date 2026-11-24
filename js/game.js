@@ -45,6 +45,8 @@ window.RelayGame = window.RelayGame || {};
 
       this.dialogueLines = [];
       this.dialogueIndex = 0;
+      this.dialogueNextState = "PLAYING";
+      this.flashBlindTimer = 0;
       this.tipBanner = null;
       this.tipShownKeys = new Set();
 
@@ -161,6 +163,7 @@ window.RelayGame = window.RelayGame || {};
       this.currentStageIdx = stageIdx;
       this.dialogueLines = G.DIALOGUES[stageIdx] || [];
       this.dialogueIndex = 0;
+      this.dialogueNextState = "PLAYING";
       this.loadStage(stageIdx, resetPlayer);
       this.state = "DIALOGUE";
       G.Audio.setBgm("stage");
@@ -176,6 +179,7 @@ window.RelayGame = window.RelayGame || {};
       this.droppedBaton = null;
       this.superCinematic = null;
       this.bossWarningTimer = 0;
+      this.flashBlindTimer = 0;
       this.crowdMood = "normal";
       this.crowdMoodTimer = 0;
       this.projectiles = [];
@@ -202,14 +206,22 @@ window.RelayGame = window.RelayGame || {};
       const maxX = stage.length + 140;
       this.bossLock = { minX, maxX };
       this.boss = new Boss(stage, maxX);
-      this.state = "BOSS_FIGHT";
       this.bossWarningTimer = 1.6;
       this.crowdMood = "panic";
       this.crowdMoodTimer = 4.0;
       if (G.VFX) G.VFX.spawn("thunder", this.boss.x, G.CONST.GROUND_Y, { scale: 1.3 });
       G.Audio.play("warning");
       G.Audio.setBgm("boss");
-      this.addBubble(this.boss, stage.bossQuote, 2.4);
+      this.dialogueLines = [
+        {
+          speaker: stage.bossName,
+          portrait: stage.bossPortraitKey || stage.bossKey,
+          text: stage.bossQuote
+        }
+      ];
+      this.dialogueIndex = 0;
+      this.dialogueNextState = "BOSS_FIGHT";
+      this.state = "DIALOGUE";
     }
 
     triggerGameOver() {
@@ -298,6 +310,9 @@ window.RelayGame = window.RelayGame || {};
       if (this.bossWarningTimer > 0) {
         this.bossWarningTimer -= dt;
       }
+      if (this.flashBlindTimer > 0) {
+        this.flashBlindTimer -= dt;
+      }
       if (G.VFX) G.VFX.update(dt);
       if (this.crowdMoodTimer > 0) {
         this.crowdMoodTimer -= dt;
@@ -343,8 +358,10 @@ window.RelayGame = window.RelayGame || {};
           G.Audio.play("confirm");
           this.dialogueIndex++;
           if (this.dialogueIndex >= this.dialogueLines.length) {
-            this.state = "PLAYING";
-            this.addBubble(this.player, "出發衝刺！", 1.5);
+            this.state = this.dialogueNextState || "PLAYING";
+            if (this.state === "PLAYING") {
+              this.addBubble(this.player, "出發衝刺！", 1.5);
+            }
           }
         }
         return;
@@ -423,7 +440,7 @@ window.RelayGame = window.RelayGame || {};
       // Projectiles & hits
       for (let i = this.projectiles.length - 1; i >= 0; i--) {
         const pr = this.projectiles[i];
-        pr.update(dt);
+        pr.update(dt, this);
         if (pr.explosive && pr.y >= G.CONST.GROUND_Y - 12) {
           // Explosive baseball AoE!
           if (G.VFX) {
@@ -627,6 +644,12 @@ window.RelayGame = window.RelayGame || {};
       // Super Mode Full-Screen Cut-In Banner & Spectacle!
       if (this.superCinematic) {
         this.drawSuperCinematic(ctx, W, H);
+      }
+
+      // Boss 1 Overclocked Flashbang Full-Screen White Flash
+      if (this.flashBlindTimer > 0) {
+        ctx.fillStyle = `rgba(255, 255, 255, ${Math.min(0.92, this.flashBlindTimer * 1.3)})`;
+        ctx.fillRect(0, 0, W, H);
       }
 
       // HUD
@@ -840,7 +863,7 @@ window.RelayGame = window.RelayGame || {};
         const bossBox = { x: cx - cardSize * 0.5, y: bossY, w: cardSize, h: cardSize };
         ctx.fillStyle = "#0f172a";
         ctx.fillRect(bossBox.x, bossBox.y, bossBox.w, bossBox.h);
-        G.Sprites.drawPortrait(ctx, st.bossKey, bossBox.x + 4, bossBox.y + 4, cardSize - 8);
+        G.Sprites.drawPortrait(ctx, st.bossPortraitKey || st.bossKey, bossBox.x + 4, bossBox.y + 4, cardSize - 8);
         ctx.strokeStyle = isSel ? "#ffffff" : "#475569";
         ctx.lineWidth = isSel ? 4 : 2;
         ctx.strokeRect(bossBox.x, bossBox.y, bossBox.w, bossBox.h);

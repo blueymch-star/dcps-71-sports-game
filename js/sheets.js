@@ -148,8 +148,10 @@ window.RelayGame = window.RelayGame || {};
 
   G.Sheets = {
     runners: {},
+    bosses: {},
     buildAll() {
       this.runners = {};
+      this.bosses = {};
       for (let i = 1; i <= 4; i++) {
         const key = "sheet_runner_" + i;
         const img = G.Assets.images[key];
@@ -157,6 +159,14 @@ window.RelayGame = window.RelayGame || {};
           const sliced = sliceSheet(img);
           if (sliced) {
             this.runners[i - 1] = sliced;
+          }
+        }
+        const bKey = "sheet_boss_" + i;
+        const bImg = G.Assets.images[bKey];
+        if (bImg && bImg.complete && bImg.naturalWidth > 0) {
+          const bSliced = sliceSheet(bImg);
+          if (bSliced) {
+            this.bosses["boss_" + i] = bSliced;
           }
         }
       }
@@ -173,6 +183,16 @@ window.RelayGame = window.RelayGame || {};
       if (state === "slip" || state === "knockback") return sheet.hurt || sheet.jump || sheet.run0;
       if (state === "shoot") return sheet.shoot || sheet.run0;
       return sheet.run0 || sheet.jump;
+    },
+    getBossFrame(bossKey, state, t) {
+      const sheet = this.bosses[bossKey];
+      if (!sheet) return null;
+      if (state === "defeated" || state === "hurt") return sheet.hurt || sheet.run0;
+      if (state === "attack" || state === "telegraph") return sheet.shoot || sheet.run0;
+      if (state === "charge") return sheet.dash || sheet.run2 || sheet.run0;
+      if (state === "jump") return sheet.jump || sheet.run1 || sheet.run0;
+      const idx = Math.floor(t * 7) % 4;
+      return sheet["run" + idx] || sheet.run0;
     }
   };
 })(window.RelayGame);
