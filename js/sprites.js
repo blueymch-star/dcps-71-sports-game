@@ -49,7 +49,7 @@ window.RelayGame = window.RelayGame || {};
           if (onDone) onDone();
         }
       };
-      img.src = src + (src.includes("?") ? "&" : "?") + "v=20261125b";
+      img.src = src + (src.includes("?") ? "&" : "?") + "v=20261125c";
     });
   };
 
@@ -813,38 +813,44 @@ window.RelayGame = window.RelayGame || {};
           ctx.beginPath();
           ctx.arc(-3, -3, 2.5, 0, Math.PI * 2);
           ctx.fill();
-        } else if (proj.kind === "debrisCone") {
-          ctx.rotate((Date.now() * 0.01) % (Math.PI * 2));
-          ctx.fillStyle = "#f97316";
-          ctx.beginPath();
-          ctx.moveTo(0, -14);
-          ctx.lineTo(11, 11);
-          ctx.lineTo(-11, 11);
-          ctx.closePath();
-          ctx.fill();
-          ctx.fillStyle = "#ffffff";
-          ctx.fillRect(-5, -2, 10, 4);
-        } else if (proj.kind === "debrisTarp") {
-          ctx.rotate((Date.now() * 0.008) % (Math.PI * 2));
-          ctx.fillStyle = "#2563eb";
-          ctx.fillRect(-12, -10, 24, 20);
-          ctx.fillStyle = "#ef4444";
-          ctx.fillRect(-12, -3, 24, 6);
-          ctx.fillStyle = "#fde047";
-          ctx.fillRect(-12, 4, 24, 4);
-        } else if (proj.kind === "debrisBranch") {
-          ctx.rotate((Date.now() * 0.012) % (Math.PI * 2));
-          ctx.strokeStyle = "#78350f";
-          ctx.lineWidth = 4;
-          ctx.beginPath();
-          ctx.moveTo(-14, 4);
-          ctx.lineTo(14, -4);
-          ctx.stroke();
-          ctx.fillStyle = "#22c55e";
-          ctx.beginPath();
-          ctx.arc(8, -6, 6, 0, Math.PI * 2);
-          ctx.arc(-4, 0, 5, 0, Math.PI * 2);
-          ctx.fill();
+        } else if (proj.kind === "debrisCone" || proj.kind === "debrisTarp" || proj.kind === "debrisBranch") {
+          const dKey = proj.kind === "debrisCone" ? "debris_cone" : proj.kind === "debrisTarp" ? "debris_tarp" : "debris_branch";
+          const dImg = Assets.images[dKey];
+          ctx.rotate((Date.now() * 0.009) % (Math.PI * 2));
+          if (dImg && dImg.complete && dImg.naturalWidth > 0) {
+            const dh = 40;
+            const dw = dImg.naturalWidth * (dh / dImg.naturalHeight);
+            ctx.drawImage(dImg, -dw * 0.5, -dh * 0.5, dw, dh);
+          } else if (proj.kind === "debrisCone") {
+            ctx.fillStyle = "#f97316";
+            ctx.beginPath();
+            ctx.moveTo(0, -14);
+            ctx.lineTo(11, 11);
+            ctx.lineTo(-11, 11);
+            ctx.closePath();
+            ctx.fill();
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(-5, -2, 10, 4);
+          } else if (proj.kind === "debrisTarp") {
+            ctx.fillStyle = "#2563eb";
+            ctx.fillRect(-12, -10, 24, 20);
+            ctx.fillStyle = "#ef4444";
+            ctx.fillRect(-12, -3, 24, 6);
+            ctx.fillStyle = "#fde047";
+            ctx.fillRect(-12, 4, 24, 4);
+          } else {
+            ctx.strokeStyle = "#78350f";
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(-14, 4);
+            ctx.lineTo(14, -4);
+            ctx.stroke();
+            ctx.fillStyle = "#22c55e";
+            ctx.beginPath();
+            ctx.arc(8, -6, 6, 0, Math.PI * 2);
+            ctx.arc(-4, 0, 5, 0, Math.PI * 2);
+            ctx.fill();
+          }
         } else if (proj.kind === "hotSausage") {
           ctx.rotate(Math.atan2(proj.vy || 0, proj.vx || 1));
           ctx.fillStyle = "rgba(249, 115, 22, 0.45)";

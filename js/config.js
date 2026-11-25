@@ -92,7 +92,10 @@ window.RelayGame = window.RelayGame || {};
     sheet_boss_1: "assets/sheet_boss_1.png",
     sheet_boss_2: "assets/sheet_boss_2.png",
     sheet_boss_3: "assets/sheet_boss_3.png",
-    sheet_boss_4: "assets/sheet_boss_4.png"
+    sheet_boss_4: "assets/sheet_boss_4.png",
+    debris_cone: "assets/debris_cone.png",
+    debris_tarp: "assets/debris_tarp.png",
+    debris_branch: "assets/debris_branch.png"
   };
 
   G.RUNNERS = [
