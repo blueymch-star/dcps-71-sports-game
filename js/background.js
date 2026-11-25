@@ -112,7 +112,7 @@ window.RelayGame = window.RelayGame || {};
       ctx.restore();
 
       // Layer 1 & 2: Seamless Panoramic Parallax School Backdrop
-      const stageBgs = ["bg_far_sky", "bg_mid_school", "bg_stadium_morning", "bg_mid_school"];
+      const stageBgs = ["bg_far_sky", "bg_mid_school", "bg_stadium_morning", "bg_mid_count"];
       const chosenKey = stageBgs[stage.id] || pal.bgKey;
       const bgImg = G.Assets.images[chosenKey] || G.Assets.images[pal.bgKey];
       const horizonY = gY - 32;

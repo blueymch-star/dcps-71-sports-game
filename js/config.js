@@ -26,6 +26,7 @@ window.RelayGame = window.RelayGame || {};
     bg_far_sky: "assets/bg_far_sky.png",
     bg_mid_school: "assets/bg_mid_school.png",
     bg_stadium_morning: "assets/bg_stadium_morning.png",
+    bg_mid_count: "assets/bg_mid_count.png",
     ground_track: "assets/ground_violet_track.png",
     bg_morning: "assets/bg_school_morning.png",
     bg_sunset: "assets/bg_school_sunset.png",
