@@ -337,8 +337,64 @@ window.RelayGame = window.RelayGame || {};
     btnToggleSfx.textContent = `遊戲音效：${G.Audio.sfxEnabled ? "開" : "關"}`;
   });
 
+  // Boss Intro Movie Player (1:1 overlay)
+  const bossMovieOverlay = document.getElementById("bossMovieOverlay");
+  const bossMovieVideo = document.getElementById("bossMovieVideo");
+  const btnSkipBossMovie = document.getElementById("btnSkipBossMovie");
+  let bossMovieCallback = null;
+
+  function stopBossMovie(silent) {
+    const cb = bossMovieCallback;
+    bossMovieCallback = null;
+    if (bossMovieOverlay) bossMovieOverlay.classList.add("hidden");
+    if (bossMovieVideo) {
+      try {
+        bossMovieVideo.pause();
+        bossMovieVideo.removeAttribute("src");
+        bossMovieVideo.load();
+      } catch (_) {}
+    }
+    if (!silent && typeof cb === "function") cb();
+  }
+
+  G.stopBossMovie = stopBossMovie;
+  G.playBossMovie = function (src, onDone) {
+    if (!bossMovieOverlay || !bossMovieVideo) {
+      if (typeof onDone === "function") onDone();
+      return;
+    }
+    bossMovieCallback = onDone || null;
+    bossMovieOverlay.classList.remove("hidden");
+    bossMovieVideo.muted = !G.Audio.sfxEnabled;
+    bossMovieVideo.src = src;
+    bossMovieVideo.currentTime = 0;
+    const playPromise = bossMovieVideo.play();
+    if (playPromise && typeof playPromise.catch === "function") {
+      playPromise.catch(() => {
+        bossMovieVideo.muted = true;
+        bossMovieVideo.play().catch(() => stopBossMovie(false));
+      });
+    }
+  };
+
+  if (bossMovieVideo) {
+    bossMovieVideo.addEventListener("ended", () => stopBossMovie(false));
+    bossMovieVideo.addEventListener("error", () => stopBossMovie(false));
+  }
+  if (btnSkipBossMovie) {
+    btnSkipBossMovie.addEventListener("click", (e) => {
+      e.stopPropagation();
+      G.Audio.play("confirm");
+      stopBossMovie(false);
+    });
+  }
+  if (bossMovieOverlay) {
+    bossMovieOverlay.addEventListener("click", () => stopBossMovie(false));
+  }
+
   btnGoStageSelect.addEventListener("click", () => {
     G.Audio.play("confirm");
+    stopBossMovie(true);
     game.state = "STAGE_SELECT";
     G.Audio.setBgm("none");
     toggleMenuModal(false);
@@ -346,6 +402,7 @@ window.RelayGame = window.RelayGame || {};
 
   btnGoTitle.addEventListener("click", () => {
     G.Audio.play("confirm");
+    stopBossMovie(true);
     game.state = "TITLE";
     G.Audio.setBgm("none");
     toggleMenuModal(false);

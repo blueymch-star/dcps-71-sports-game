@@ -49,7 +49,7 @@ window.RelayGame = window.RelayGame || {};
           if (onDone) onDone();
         }
       };
-      img.src = src + (src.includes("?") ? "&" : "?") + "v=20261125c";
+      img.src = src + (src.includes("?") ? "&" : "?") + "v=20261125d";
     });
   };
 

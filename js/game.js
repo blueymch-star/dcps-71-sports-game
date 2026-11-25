@@ -47,6 +47,7 @@ window.RelayGame = window.RelayGame || {};
       this.dialogueIndex = 0;
       this.dialogueNextState = "PLAYING";
       this.flashBlindTimer = 0;
+      this.bossMovieGrace = 0;
       this.tipBanner = null;
       this.tipShownKeys = new Set();
 
@@ -212,6 +213,19 @@ window.RelayGame = window.RelayGame || {};
       if (G.VFX) G.VFX.spawn("thunder", this.boss.x, G.CONST.GROUND_Y, { scale: 1.3 });
       G.Audio.play("warning");
       G.Audio.setBgm("boss");
+
+      if (stage.bossMovie && typeof G.playBossMovie === "function") {
+        this.state = "BOSS_INTRO";
+        this.bossMovieGrace = 0.45;
+        G.playBossMovie(stage.bossMovie, () => {
+          this.beginBossDialogue(stage);
+        });
+      } else {
+        this.beginBossDialogue(stage);
+      }
+    }
+
+    beginBossDialogue(stage) {
       this.dialogueLines = [
         {
           speaker: stage.bossName,
@@ -317,6 +331,14 @@ window.RelayGame = window.RelayGame || {};
       if (this.crowdMoodTimer > 0) {
         this.crowdMoodTimer -= dt;
         if (this.crowdMoodTimer <= 0) this.crowdMood = "normal";
+      }
+
+      if (this.state === "BOSS_INTRO") {
+        if (this.bossMovieGrace > 0) this.bossMovieGrace -= dt;
+        if (this.bossMovieGrace <= 0 && (input.shootPressed || input.jumpPressed)) {
+          if (typeof G.stopBossMovie === "function") G.stopBossMovie(false);
+        }
+        return;
       }
 
       if (this.state === "TITLE") {
@@ -563,7 +585,7 @@ window.RelayGame = window.RelayGame || {};
         G.Audio.play("confirm");
         this.dialogueIndex++;
         if (this.dialogueIndex >= this.dialogueLines.length) {
-          this.state = "PLAYING";
+          this.state = this.dialogueNextState || "PLAYING";
         }
       } else if (this.state === "BATON_QTE" && !this.qte.resolved) {
         this.resolveBatonQTE();

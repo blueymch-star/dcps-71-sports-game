@@ -1,5 +1,6 @@
 *.mp4
 *.MP4
+!assets/boss0*_intro.mp4
 tools/
 .DS_Store
 Thumbs.db

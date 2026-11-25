@@ -676,3 +676,47 @@ body {
     transform: translateY(8px) scale(0.91);
   }
 }
+
+/* Boss Intro Movie Overlay (1:1 centered square) */
+.boss-movie-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  background: rgba(0, 0, 0, 0.88);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.boss-movie-overlay.hidden {
+  display: none;
+}
+
+.boss-movie-video {
+  width: min(100dvh, 100vw);
+  height: min(100dvh, 100vw);
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  display: block;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.9);
+}
+
+.boss-movie-skip {
+  position: fixed;
+  right: max(18px, env(safe-area-inset-right));
+  bottom: max(18px, env(safe-area-inset-bottom));
+  z-index: 46;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 2px solid rgba(253, 224, 71, 0.8);
+  background: rgba(15, 23, 42, 0.82);
+  color: #fde047;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  cursor: pointer;
+}
+
+.boss-movie-skip:active {
+  transform: scale(0.95);
+}
